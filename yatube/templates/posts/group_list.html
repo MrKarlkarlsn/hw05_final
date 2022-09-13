@@ -1,0 +1,30 @@
+{%extends 'base.html'%}
+{%block title%}
+  Группа: {{title}}
+{%endblock%}
+{% block header %}<h1>{{group.title}}</h1>{% endblock %}
+{%block content%}
+  <p>
+    {{group.description}}
+  </p>
+
+  {% for post in page_obj %}
+    <arcticle>
+      <ul>
+        <li>
+          Автор: {{post.author.get_full_name}}
+        </li>
+        <li>
+          Дата публикации: {{post.pub_date|date:"d E Y"}}
+        </li>
+      </ul>
+      <p>
+        {{post.text}}
+      </p>
+      <p>
+        <a href="{% url 'posts:post_detail' post.id %}">Прочитать статью целиком.</a>
+      </p>
+    </arcticle>
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+{% endblock %}
