@@ -1,4 +1,5 @@
 {%extends 'base.html'%}
+{% load thumbnail %}
 {%block title%}
   Группа: {{title}}
 {%endblock%}
@@ -18,6 +19,9 @@
           Дата публикации: {{post.pub_date|date:"d E Y"}}
         </li>
       </ul>
+      {% thumbnail post.image "1920x1080" crop="center" upscale=True as im %}
+      <img class="card-img my-2" src="{{ im.url }}">
+      {% endthumbnail %}
       <p>
         {{post.text}}
       </p>

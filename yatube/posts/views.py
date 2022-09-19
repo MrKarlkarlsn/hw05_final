@@ -1,13 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.cache import cache_page
 
-from .models import Post, Group, User
-from .forms import PostForm
+from .models import Post, Group, User, Follow
+from .forms import PostForm, CommentForm
 
 MY_SLICE = 10
 
 
+@cache_page(20)
 def index(request):
     templates = 'posts/index.html'
     posts = Post.objects.all().select_related()
@@ -40,10 +42,13 @@ def group_posts(request, slug):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    all_posts = post.author.posts.count()
+    all_posts_count = post.author.posts.count()
     context = {
         'post': post,
-        'all_posts': all_posts
+        'all_posts': all_posts_count,
+        'form': CommentForm(request.POST or None),
+        'comments': post.comments.all()
+
     }
     return render(request, 'posts/post_detail.html', context)
 
@@ -85,7 +90,9 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
         return redirect('posts:post_detail', post_id=post_id)
-    form = PostForm(request.POST or None, instance=post)
+    form = PostForm(request.POST or None,
+                    files=request.FILES or None,
+                    instance=post)
     if form.is_valid():
         form.save()
         return redirect('posts:post_detail', post_id=post_id)
@@ -95,3 +102,53 @@ def post_edit(request, post_id):
         'form': form,
     }
     return render(request, 'posts/create_post.html', context)
+
+
+@login_required
+def post_delete(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if post.author != request.user:
+        return redirect('posts:post_detail', post_id=post_id)
+    post.delete()
+    return redirect('posts:profile', username=request.user)
+
+
+@login_required
+def add_comments(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        comment.save()
+        return redirect('posts:post_detail', post_id=post_id)
+
+
+@login_required
+def follow_index(request):
+    posts_list = Post.objects.filter(author__following__user=request.user)
+    paginator = Paginator(posts_list, MY_SLICE)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    template = 'posts/follow.html'
+    context = {
+        'page': page
+    }
+    return render(request, template, context)
+
+
+@login_required
+def profile_follow(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    if request.user != profile_user:
+        Follow.objects.get_or_create(author=profile_user)
+        return redirect('posts:profile', username=username)
+    return redirect('posts:main')
+
+
+@login_required
+def profile_unfollow(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    Follow.objects.filter(user=request.user, author=profile_user).delete()
+    return redirect('posts:profile', username=username)

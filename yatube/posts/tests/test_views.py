@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -67,6 +68,19 @@ class ViewsContextTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
         cls.user_test = User.objects.create(
             username='Lemon'
         )
@@ -77,8 +91,9 @@ class ViewsContextTests(TestCase):
         )
         cls.test_post = Post.objects.create(
             author=cls.user_test,
+            image=uploaded,
             text='test_post_text',
-            group=cls.group_test
+            group=cls.group_test,
         )
 
     def page_queryset_post_test(self, context, find_object):
@@ -95,6 +110,7 @@ class ViewsContextTests(TestCase):
         self.assertEqual(post_in_context.author, post_in_db.author)
         self.assertEqual(post_in_context.group, post_in_db.group)
         self.assertEqual(post_in_context.pub_date, post_in_db.pub_date)
+        self.assertEqual(post_in_context.image, post_in_db.image)
 
     def test_index_put_in_render_right_context(self):
         """Проверка, что "main" выдаёт верный контекст в шаблон."""

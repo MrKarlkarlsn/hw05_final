@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %} {{ post.text|truncatechars:30}} {% endblock %}
+{% load thumbnail %}
 {% block content %}
   <body>
     <main>
@@ -29,15 +30,20 @@
               </a>
               {% if post.author == user %}
                 <a type="button" class="btn btn-primary" href="{% url 'posts:edit' post.id %}">Редактиравать запись</a>
+                <a type="button" class="btn btn-danger" href="{% url 'posts:delete' post.id %}">Удалить запись</a>
               {% endif %}
             </li>
           </ul>
         </aside>
 
         <article class="col-12 col-md-9">
+          {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+            <img class="card-img my-2" src="{{ im.url }}">
+          {% endthumbnail %}
           <p>
             {{ post.text }}
           </p>
+          {% include 'posts/comment.html'%}
         </article>
       </div>
     </main>
