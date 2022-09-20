@@ -55,14 +55,23 @@ def post_detail(request, post_id):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
+
     post_list = Post.objects.filter(author__username=username).all()
     paginator = Paginator(post_list, MY_SLICE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    following_flag = False
+    if ((request.user.is_authenticated)
+            and Follow.objects.filter(
+                user=request.user, author=author).exists()):
+        following_flag = True
+
     context = {
         'author': author,
         'post_count': len(post_list),
-        'page_obj': page_obj
+        'page_obj': page_obj,
+        'following': following_flag
     }
     return render(request, 'posts/profile.html', context)
 
@@ -133,7 +142,8 @@ def follow_index(request):
     page = paginator.get_page(page_number)
     template = 'posts/follow.html'
     context = {
-        'page': page
+        'page_obj': page,
+        'title': 'Избранные авторы'
     }
     return render(request, template, context)
 
@@ -142,7 +152,7 @@ def follow_index(request):
 def profile_follow(request, username):
     profile_user = get_object_or_404(User, username=username)
     if request.user != profile_user:
-        Follow.objects.get_or_create(author=profile_user)
+        Follow.objects.get_or_create(user=request.user, author=profile_user)
         return redirect('posts:profile', username=username)
     return redirect('posts:main')
 

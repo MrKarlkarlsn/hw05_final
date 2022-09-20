@@ -11,7 +11,8 @@ class Post(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='posts'
+        related_name='posts',
+        verbose_name='Автор поста'
     )
     group = models.ForeignKey(
         'Group',
@@ -28,6 +29,8 @@ class Post(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Запись'
+        verbose_name_plural = 'Записи'
         ordering = ['-pub_date']
 
     def __str__(self):
@@ -38,6 +41,10 @@ class Group(models.Model):
     title = models.CharField(verbose_name='Название группы', max_length=200)
     slug = models.SlugField(max_length=50, unique=True)
     description = models.TextField(verbose_name='Описание группы')
+
+    class Meta:
+        verbose_name = 'Группа'
+        verbose_name_plural = 'Группы'
 
     def __str__(self):
         return self.title
@@ -60,6 +67,8 @@ class Comment(models.Model):
                                    verbose_name='Время публикации комментария')
 
     class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ['-created']
 
     def __str__(self):
@@ -67,12 +76,12 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='follower',
-        verbose_name='Подписчик'
-    ),
+        verbose_name='Пользователь'
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -80,6 +89,10 @@ class Follow(models.Model):
         verbose_name='Автор'
     )
 
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
     def __str__(self):
-        return (f'Пользователь {self.follower}' 
+        return (f'Пользователь {self.user} ' 
                 f'подписался на {self.author}')

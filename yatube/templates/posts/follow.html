@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
 {% block title %}
-  Главная страница
+  Избранные авторы
 {% endblock %}
 {% block content%}
+{% include 'includes/switcher.html' %}
   <h3> {{title}} </h3>
   <ul>
   {% for post in page_obj %}
@@ -17,13 +18,9 @@
     </ul>
     <p>{{ post.text }}</p>
     <p>
-    {% thumbnail post.image "1920x1080" crop="center" upscale=True as im %}
-      <div class="card" style="width: 28rem;">
-      <img class="card-img-top" src="{{ im.url }}" alt="Card image cap">
-      <div class="card-body">
-        </div>
-    </div>
-      {% endthumbnail %}
+    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+            <img class="card-img my-2" src="{{ im.url }}">
+          {% endthumbnail %}
     </p>
     {% if post.group %}
       <a href="{% url 'posts:group' post.group.slug %}">Перейти в группу {{ post.group.title }}</a>
