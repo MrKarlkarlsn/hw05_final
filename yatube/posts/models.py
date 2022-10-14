@@ -24,7 +24,7 @@ class Post(models.Model):
     )
     image = models.ImageField(
         verbose_name='Картинка',
-        upload_to= 'posts/',
+        upload_to='posts/',
         blank=True
     )
 
@@ -94,5 +94,5 @@ class Follow(models.Model):
         verbose_name_plural = 'Подписки'
 
     def __str__(self):
-        return (f'Пользователь {self.user} ' 
+        return (f'Пользователь {self.user} '
                 f'подписался на {self.author}')

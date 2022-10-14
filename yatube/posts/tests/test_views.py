@@ -286,7 +286,7 @@ class PostRightInPage(TestCase):
 
 
 class DeletePostTest(TestCase):
-    """Проверка фунции удаления поста"""
+    """Проверка фунции удаления поста."""
 
     @classmethod
     def setUpClass(cls):
@@ -310,5 +310,6 @@ class DeletePostTest(TestCase):
         self.authorized_client.force_login(self.user_test)
 
     def delete_post(self):
-        response = self.authorized_client.get(reverse('posts:delete', args=self.test_post.id))
+        response = self.authorized_client.get(
+            reverse('posts:delete', args=self.test_post.id))
         self.assertNotEqual(response.context[''])
