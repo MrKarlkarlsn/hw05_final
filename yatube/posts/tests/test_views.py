@@ -283,3 +283,32 @@ class PostRightInPage(TestCase):
         response = self.client.get(reverse('posts:profile',
                                            args=(self.user_test,)))
         self.assertEqual(response.context['page_obj'][0], self.test_post)
+
+
+class DeletePostTest(TestCase):
+    """Проверка фунции удаления поста"""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_test = User.objects.create(
+            username='Lemon'
+        )
+        cls.group_test = Group.objects.create(
+            title='Заголовок тестовой группы',
+            description='Описание тестовой группы',
+            slug='test-slug'
+        )
+        cls.test_post = Post.objects.create(
+            author=cls.user_test,
+            text='Текст тестового поста',
+            group=cls.group_test
+        )
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user_test)
+
+    def delete_post(self):
+        response = self.authorized_client.get(reverse('posts:delete', args=self.test_post.id))
+        self.assertNotEqual(response.context[''])
