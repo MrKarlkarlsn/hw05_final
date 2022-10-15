@@ -3,11 +3,14 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
+from shutil import rmtree
+
 from ..models import Post, Group
 
 
 User = get_user_model()
 
+Test_folder = '/media/test-folder'
 
 class FormsTest(TestCase):
 
@@ -25,7 +28,7 @@ class FormsTest(TestCase):
         cls.uploaded_one_img = SimpleUploadedFile(
             name='small_1.gif',
             content=small_gif_one,
-            content_type='media/posts'
+            content_type=Test_folder,
         )
         small_gif_two = (
             b'\x45\x46\x47\x48\x49\x59\x60\x61'
@@ -38,7 +41,7 @@ class FormsTest(TestCase):
         cls.uploaded_two_img = SimpleUploadedFile(
             name='small_2.gif',
             content=small_gif_two,
-            content_type='media/posts'
+            content_type=Test_folder
         )
         cls.test_user = User.objects.create(
             username='Lemon'
@@ -63,6 +66,9 @@ class FormsTest(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.test_user)
+
+    def tearDown(self):
+        rmtree(Test_folder, ignore_errors=True)
 
     def test_new_post(self):
         count_posts = Post.objects.count()

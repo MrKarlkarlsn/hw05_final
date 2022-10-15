@@ -6,6 +6,7 @@ from ..models import Post, Group
 from http import HTTPStatus
 
 from django.conf import settings
+
 User = get_user_model()
 
 
@@ -44,6 +45,8 @@ class TaskURLTests(TestCase):
         """Проверяем несуществующую страницу."""
         no_page = self.guest_client.get('no_page')
         self.assertEqual(no_page.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTemplateUsed(no_page, 'core/404.html')
+
 
     def test_urls_uses_correct_template(self):
         """Проверяем шаблоны страниц."""
@@ -58,7 +61,7 @@ class TaskURLTests(TestCase):
             'posts/profile.html': f'/profile/{user}/',
             'posts/post_detail.html': f'/posts/{post_id}/',
             template_page_edit: f'/posts/{post_id}/edit/',
-            'posts/create_post.html': '/create/'
+            'posts/create_post.html': '/create/',
         }
         for template, address in templates_url_names.items():
             with self.subTest(address=address):

@@ -6,6 +6,8 @@ from django.urls import reverse
 from ..models import Group, Post
 from ..forms import PostForm
 
+from .test_forms import Test_folder
+
 User = get_user_model()
 
 
@@ -97,7 +99,7 @@ class ViewsContextTests(TestCase):
         )
 
     def page_queryset_post_test(self, context, find_object):
-        post_in_db = ViewsContextTests.test_post
+        post_in_db = self.test_post
         self.assertIn(find_object, context)
         if find_object == 'page_obj':
             page_list = context.get(find_object).object_list
