@@ -1,4 +1,7 @@
+from shutil import rmtree
+
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -6,7 +9,6 @@ from django.urls import reverse
 from ..models import Group, Post
 from ..forms import PostForm
 
-from .test_forms import Test_folder
 
 User = get_user_model()
 
@@ -37,11 +39,17 @@ class URLPathTemplatesTests(TestCase):
             self.author_in_post
         )
 
+
+    def tearDown(self):
+        rmtree('media/posts', ignore_errors=True)
+
     def test_right_temlate_use_with_url(self):
         """Проверка, что по запросу url используется верный шаблон."""
         self.slug = self.group_test.slug
         self.username = self.test_post.author
         self.post_id = self.test_post.id
+        cache.clear()
+
 
         url_template_name = {
             reverse('posts:main'): 'posts/index.html',
@@ -98,7 +106,11 @@ class ViewsContextTests(TestCase):
             group=cls.group_test,
         )
 
+    def tearDown(self):
+        rmtree('media/posts', ignore_errors=True)
+
     def page_queryset_post_test(self, context, find_object):
+        cache.clear()
         post_in_db = self.test_post
         self.assertIn(find_object, context)
         if find_object == 'page_obj':
@@ -116,6 +128,7 @@ class ViewsContextTests(TestCase):
 
     def test_index_put_in_render_right_context(self):
         """Проверка, что "main" выдаёт верный контекст в шаблон."""
+        cache.clear()
         response = self.client.get(reverse('posts:main'))
         self.page_queryset_post_test(response.context, 'page_obj')
         title_page = 'Это главная страница проекта Yatube'
@@ -216,11 +229,13 @@ class PaginatorWorkRight(TestCase):
         Post.objects.bulk_create(posts_14)
 
     def test_first_page_contains_ten_records(self):
+        cache.clear()
         response = self.client.get(reverse('posts:main'))
         # Проверка: количество постов на первой странице равно 10.
         self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_second_page_contains_three_records(self):
+        cache.clear()
         # Проверка: на второй странице должно быть 4 поста.
         response = self.client.get(reverse('posts:main') + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 4)
@@ -272,7 +287,16 @@ class PostRightInPage(TestCase):
             group=cls.group_test
         )
 
+    def setUp(self):
+        self.authorized_author = Client()
+        self.authorized_author.force_login(
+            self.test_post.author
+        )
+        cache.clear()
+
+
     def test_post_right_in_main(self):
+        cache.clear()
         response = self.client.get(reverse('posts:main'))
         self.assertEqual(response.context['page_obj'][0], self.test_post)
 
@@ -286,32 +310,21 @@ class PostRightInPage(TestCase):
                                            args=(self.user_test,)))
         self.assertEqual(response.context['page_obj'][0], self.test_post)
 
-
-class DeletePostTest(TestCase):
-    """Проверка фунции удаления поста."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user_test = User.objects.create(
-            username='Lemon'
+    def test_cache_main_page(self):
+        """Проверка работы кеша"""
+        cache_test_post = Post.objects.create(
+            text='Пост тестирование кеша',
+            author=self.test_post.author,
         )
-        cls.group_test = Group.objects.create(
-            title='Заголовок тестовой группы',
-            description='Описание тестовой группы',
-            slug='test-slug'
-        )
-        cls.test_post = Post.objects.create(
-            author=cls.user_test,
-            text='Текст тестового поста',
-            group=cls.group_test
-        )
+        content_add = self.authorized_author.get(
+            reverse('posts:main')).content
+        cache_test_post.delete()
+        content_delete = self.authorized_author.get(
+            reverse('posts:main')).content
+        self.assertEqual(content_add, content_delete)
+        cache.clear()
+        content_cache_clear = self.authorized_author.get(
+            reverse('posts:main')).content
+        self.assertNotEqual(content_add, content_cache_clear)
 
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user_test)
 
-    def delete_post(self):
-        response = self.authorized_client.get(
-            reverse('posts:delete', args=self.test_post.id))
-        self.assertNotEqual(response.context[''])

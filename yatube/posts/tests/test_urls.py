@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase, Client
 
 from ..models import Post, Group
@@ -50,10 +51,12 @@ class TaskURLTests(TestCase):
 
     def test_urls_uses_correct_template(self):
         """Проверяем шаблоны страниц."""
+        cache.clear()
         slug_group = self.group_in_post.slug
         user = self.author_in_post.username
         post_id = self.post.id
         template_page_edit = 'posts/create_post.html'
+
 
         templates_url_names = {
             'posts/index.html': '/',
