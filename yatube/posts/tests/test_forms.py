@@ -65,7 +65,7 @@ class FormsTest(TestCase):
             'image': self.uploaded_one_img
         }
 
-        response = self.authorized_client.post(
+        self.authorized_client.post(
             reverse('posts:create'),
             data=form_data,
             follow=True
@@ -84,7 +84,7 @@ class FormsTest(TestCase):
             'group': self.group_test.id
         }
 
-        response = self.authorized_client.post(
+        self.authorized_client.post(
             reverse('posts:edit', args=(self.test_post.id,)),
             data=form_data,
             follow=True
