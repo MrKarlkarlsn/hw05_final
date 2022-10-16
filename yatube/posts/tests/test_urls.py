@@ -48,7 +48,6 @@ class TaskURLTests(TestCase):
         self.assertEqual(no_page.status_code, HTTPStatus.NOT_FOUND)
         self.assertTemplateUsed(no_page, 'core/404.html')
 
-
     def test_urls_uses_correct_template(self):
         """Проверяем шаблоны страниц."""
         cache.clear()
@@ -56,7 +55,6 @@ class TaskURLTests(TestCase):
         user = self.author_in_post.username
         post_id = self.post.id
         template_page_edit = 'posts/create_post.html'
-
 
         templates_url_names = {
             'posts/index.html': '/',

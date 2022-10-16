@@ -39,7 +39,6 @@ class URLPathTemplatesTests(TestCase):
             self.author_in_post
         )
 
-
     def tearDown(self):
         rmtree('media/posts', ignore_errors=True)
 
@@ -49,7 +48,6 @@ class URLPathTemplatesTests(TestCase):
         self.username = self.test_post.author
         self.post_id = self.test_post.id
         cache.clear()
-
 
         url_template_name = {
             reverse('posts:main'): 'posts/index.html',
@@ -294,7 +292,6 @@ class PostRightInPage(TestCase):
         )
         cache.clear()
 
-
     def test_post_right_in_main(self):
         cache.clear()
         response = self.client.get(reverse('posts:main'))
@@ -311,7 +308,7 @@ class PostRightInPage(TestCase):
         self.assertEqual(response.context['page_obj'][0], self.test_post)
 
     def test_cache_main_page(self):
-        """Проверка работы кеша"""
+        """Проверка работы кеша."""
         cache_test_post = Post.objects.create(
             text='Пост тестирование кеша',
             author=self.test_post.author,
@@ -326,5 +323,3 @@ class PostRightInPage(TestCase):
         content_cache_clear = self.authorized_author.get(
             reverse('posts:main')).content
         self.assertNotEqual(content_add, content_cache_clear)
-
-

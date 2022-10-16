@@ -12,7 +12,6 @@ from ..models import Post, Group
 User = get_user_model()
 
 
-
 class FormsTest(TestCase):
 
     @classmethod
@@ -77,10 +76,8 @@ class FormsTest(TestCase):
         self.assertEqual(db_post.group.id, form_data['group'])
         self.assertFalse(db_post.image, None)
 
-
-
     def test_edit_post(self):
-        """Проверка редактирования поста"""
+        """Проверка редактирования поста."""
         text = 'Просто текс'
         form_data = {
             'text': text,
