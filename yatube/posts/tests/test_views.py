@@ -324,8 +324,5 @@ class PostRightInPage(TestCase):
             reverse('posts:main')).content
         self.assertNotEqual(content_add, content_cache_clear)
 
-
     def test_delete_post(self):
         pass
-
-
