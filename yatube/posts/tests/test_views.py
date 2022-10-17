@@ -323,3 +323,9 @@ class PostRightInPage(TestCase):
         content_cache_clear = self.authorized_author.get(
             reverse('posts:main')).content
         self.assertNotEqual(content_add, content_cache_clear)
+
+
+    def test_delete_post(self):
+        pass
+
+

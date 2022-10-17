@@ -1,18 +1,21 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 
 MY_SLICE = 10
+CACHE_TIME = 20
 
 
-@cache_page(20)
 def index(request):
     templates = 'posts/index.html'
-    posts = Post.objects.all().select_related()
+    posts = cache.get('posts')
+    if not posts:
+        posts = Post.objects.all().select_related()
+        cache.set('posts', posts, CACHE_TIME)
     paginator = Paginator(posts, MY_SLICE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
