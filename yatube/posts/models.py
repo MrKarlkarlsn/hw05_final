@@ -96,3 +96,24 @@ class Follow(models.Model):
     def __str__(self):
         return (f'Пользователь {self.user} '
                 f'подписался на {self.author}')
+
+
+class Like(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='post_like',
+        verbose_name='Пост',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='user_like',
+        verbose_name='Пользователь'
+    )
+    like = models.BooleanField(default=False,
+                               verbose_name='like')
+
+    def __str__(self):
+        return(f'Пользователь {self.user} '
+               f'лайкнул {self.post.text}')

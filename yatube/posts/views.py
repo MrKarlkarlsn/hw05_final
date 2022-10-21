@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.cache import cache
 
-from .models import Post, Group, User, Follow
+from .models import Post, Group, User, Follow, Like
 from .forms import PostForm, CommentForm
 
 MY_SLICE = 10
@@ -165,3 +165,24 @@ def profile_unfollow(request, username):
     profile_user = get_object_or_404(User, username=username)
     Follow.objects.filter(user=request.user, author=profile_user).delete()
     return redirect('posts:profile', username=username)
+
+@login_required
+def post_like(request, posts):
+    post = get_object_or_404(Post, pk=posts)
+    Like.objects.create(
+        post=post,
+        user=request.user,
+        like=True
+    )
+    return redirect('posts:main')
+
+
+@login_required
+def post_unlike(request, posts):
+    post = get_object_or_404(Post, pk=posts)
+    Like.objects.filter(
+        post=post,
+        user=request.user,
+        like=True
+    ).delete()
+    return redirect('posts:main')

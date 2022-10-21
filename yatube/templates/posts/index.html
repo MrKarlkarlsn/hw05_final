@@ -24,6 +24,8 @@
     </p>
     {% if post.group %}
       <a href="{% url 'posts:group' post.group.slug %}">Перейти в группу {{ post.group.title }}</a>
+        <a href="{% url 'posts:like' post.id %}">Лайк</a>
+        <a href="{% url 'posts:unlike' post.id %}">Не лайк</a>
     {% endif %}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
